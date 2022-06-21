@@ -1,44 +1,65 @@
-package Pieces;
-import Game.*;
+package pieces;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import game.*;
+import game.Move.AttackMove;
+import game.Move.JustMove;
 
 public class Knight extends Piece {
 
-    Type type;
+    private final static int[] CANDIDATE_MOVE_COORDINATES = {-17, -15, -10, -6, 6, 10, 15, 17};
 
-    public Knight(int x, int y) {
-        super(x, y);
-        type = Type.KNIGHT;
+    Knight(final int piecePosition, final Allegiance allegiance) {
+        super(piecePosition, allegiance, Type.KNIGHT);
     }
 
-    public Type getType() {return Type.KNIGHT;}
+    @Override
+    public List<Move> calculateLegalMoves (final Board board) {
 
-    public boolean isValidPath(int finalX, int finalY) {
-        int x_diff = Math.abs(finalX - this.x);
-        int y_diff = Math.abs(finalY - this.y);
+        List<Move> legalMoves = new ArrayList<>();
 
-        return Math.abs(x_diff - y_diff) == 1;
-    }
-
-    public int [][] drawPath(int startX, int startY, int finalX, int finalY) {
-        int pathLen = 3;
-
-        int lenX = Math.abs(finalX - startX);
-        int lenY = Math.abs(finalY - startY);
-
-        int x_dir = 1, y_dir = 1;
-        if (finalX - startX < 0) x_dir = -1;
-        if (finalY - startY < 0) y_dir = -1;
-
-        int [][] path = new int [2][pathLen - 1];
-
-        for (int i = 0; i < pathLen - 1; i++) {
-            if (i < lenX) path[0][i] = startX + x_dir*i;
-            else path[0][i] = startX + x_dir*lenX;
-            if (i < lenY) path[1][i] = startY + y_dir*i;
-            else path[1][i] = startY + y_dir*lenY;
+        for (final int currentCandidate : CANDIDATE_MOVE_COORDINATES) {
+            int candidateDestinationCoordinate = this.piecePosition + currentCandidate;
+            if (Board.isValidTileCoordinate(candidateDestinationCoordinate)) {
+                if (isFirstColumnExclusion(this.piecePosition, currentCandidate) ||
+                    isSecondColumnExclusion(this.piecePosition, currentCandidate) ||
+                    isSeventhColumnExclusion(this.piecePosition, currentCandidate) ||
+                    isEighthColumnExclusion(this.piecePosition, currentCandidate)) {
+                    continue;
+                }
+                final Tile candidateDestinationTile = board.getTile(candidateDestinationCoordinate);
+                if (!candidateDestinationTile.isTileOccupied()) {
+                    legalMoves.add(new JustMove(board, this, candidateDestinationCoordinate));
+                } else {
+                    final Piece pieceAtDestination = candidateDestinationTile.getPiece();
+                    final Allegiance pieceAllegiance = pieceAtDestination.getPieceAllegiance();
+                    if (this.pieceAllegiance != pieceAllegiance) {
+                        legalMoves.add(new AttackMove(board, this, candidateDestinationCoordinate, pieceAtDestination));
+                    }
+                }
+            }
         }
 
-        return path;
+        return Collections.unmodifiableList(legalMoves);
+    }
+
+    private static boolean isFirstColumnExclusion (final int currentPosition, final int candidateOffset) {
+        return Board.FIRST_COLUMN[currentPosition] && (candidateOffset == -17 || candidateOffset == -10 || candidateOffset == 6 || candidateOffset == 15);
+    }
+
+    private static boolean isSecondColumnExclusion (final int currentPosition, final int candidateOffset) {
+        return Board.SECOND_COLUMN[currentPosition] && (candidateOffset == -10 || candidateOffset == 6);
+    }
+
+    private static boolean isSeventhColumnExclusion (final int currentPosition, final int candidateOffset) {
+        return Board.SEVENTH_COLUMN[currentPosition] && (candidateOffset == -6 || candidateOffset == 10);
+    }
+
+    private static boolean isEighthColumnExclusion (final int currentPosition, final int candidateOffset) {
+        return Board.EIGHTH_COLUMN[currentPosition] && (candidateOffset == -15 || candidateOffset == -6 || candidateOffset == 10 || candidateOffset == 17);
     }
     
 }

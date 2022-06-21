@@ -1,20 +1,26 @@
-package Pieces;
-import Game.*;
+package pieces;
+
+import java.util.List;
+
+import game.*;
 
 public abstract class Piece {
     
-    public int x, y;
+    protected final int piecePosition;
+    protected final Allegiance pieceAllegiance;
+    final Type type;
     
-    public Piece(int x, int y) {
-        this.x = x;
-        this.y = y;
+    Piece(final int piecePosition, final Allegiance pieceAllegiance, final Type type) {
+        this.piecePosition = piecePosition;
+        this.pieceAllegiance = pieceAllegiance;
+        this.type = type;
         
     }
 
-    public abstract boolean isValidPath(int finalX, int finalY);
+    public abstract List<Move> calculateLegalMoves(final Board board);
 
-    public abstract int[][] drawPath(int startX, int startY, int finalX, int finalY);
-
-    public abstract Type getType();
+    public Allegiance getPieceAllegiance() {
+        return this.pieceAllegiance;
+    }
 
 }

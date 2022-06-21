@@ -1,5 +1,5 @@
-package Pieces;
-import Game.*;
+package pieces;
+import game.*;
 
 public class Bishop extends Piece {
     

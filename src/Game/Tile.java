@@ -1,27 +1,29 @@
-package Game;
-import Pieces.*;
+package game;
+
+import pieces.*;
 import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
 
 public abstract class Tile {
     
     protected final int tileCoordinate;
 
-    private static final Map<Integer, EmptyTile> EMPTY_TILES = createAllPossibleEmptyTiles();
+    private static final Map<Integer, EmptyTile> EMPTY_TILES_CACHE = createAllPossibleEmptyTiles();
 
     private static Map<Integer, EmptyTile> createAllPossibleEmptyTiles() {
         final Map<Integer, EmptyTile> emptyTileMap = new HashMap<>();
-        for (int i = 0; i < 64; i++) {
+        for (int i = 0; i < Board.NUM_TILES; i++) {
             emptyTileMap.put(i, new EmptyTile(i));
         }
-        return emptyTileMap;
+        return Collections.unmodifiableMap(emptyTileMap);
     }
 
     public static Tile createTile(final int tileCoordinate, final Piece piece) {
-        return piece != null ? new OccupiedTile(tileCoordinate, piece) : EMPTY_TILES.get(tileCoordinate);
+        return piece != null ? new OccupiedTile(tileCoordinate, piece) : EMPTY_TILES_CACHE.get(tileCoordinate);
     }
 
-    private Tile(int tileCoordinate) {
+    private Tile(final int tileCoordinate) {
         this.tileCoordinate = tileCoordinate;
     }
 
@@ -51,7 +53,7 @@ public abstract class Tile {
 
         private final Piece pieceOnTile;
 
-        OccupiedTile(int tileCoordinate, Piece pieceOnTile) {
+        OccupiedTile(final int tileCoordinate, final Piece pieceOnTile) {
             super(tileCoordinate);
             this.pieceOnTile = pieceOnTile;
         }
